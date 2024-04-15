@@ -1,8 +1,7 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
-public static class PiecesDatabase
+public static class SpritesDatabase
 {
     public static Sprite[] Sprites { get; private set; }
     public static int Length { get; private set; }
@@ -13,9 +12,5 @@ public static class PiecesDatabase
         Sprites = Resources.LoadAll<Sprite>("Sprites/");
         Length = Sprites.Length;
     }
-    public static Sprite GetRandomPiece()
-    {
-        return Sprites[Random.Range(0, Length)];
-    }
-} 
 
+} 

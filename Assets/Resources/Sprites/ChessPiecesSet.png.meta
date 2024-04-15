@@ -117,133 +117,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: queen
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1c9e341d353e4894cb0af87a5c0ee443
-      internalID: 1250888247
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: king
-      rect:
-        serializedVersion: 2
-        x: 60
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 0aff7fae3cbc2c546a0adb18a0b88e9b
-      internalID: -1487596889
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: rook
-      rect:
-        serializedVersion: 2
-        x: 120
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 66669d61f8bb39c498911f5fc2595e21
-      internalID: -1064425992
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: knight
-      rect:
-        serializedVersion: 2
-        x: 180
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 81f2182ce5a34f44aaba1a8b38864107
-      internalID: -311125193
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: bishop
-      rect:
-        serializedVersion: 2
-        x: 240
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: fe341d009cce0fd48b57d0ae47755402
-      internalID: 1673635174
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pawn
-      rect:
-        serializedVersion: 2
-        x: 300
-        y: 60
-        width: 60
-        height: 60
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4b11354d3bc9af64fba16336383f1a44
-      internalID: 456302087
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ChessPiecesSet_6
+      name: Queen
       rect:
         serializedVersion: 2
         x: 0
@@ -264,7 +138,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ChessPiecesSet_7
+      name: King
       rect:
         serializedVersion: 2
         x: 60
@@ -285,7 +159,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ChessPiecesSet_8
+      name: Rook
       rect:
         serializedVersion: 2
         x: 120
@@ -306,7 +180,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ChessPiecesSet_9
+      name: Knight
       rect:
         serializedVersion: 2
         x: 180
@@ -327,7 +201,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ChessPiecesSet_10
+      name: Bishop
       rect:
         serializedVersion: 2
         x: 240
@@ -348,7 +222,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ChessPiecesSet_11
+      name: Pawn
       rect:
         serializedVersion: 2
         x: 300
@@ -379,12 +253,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      ChessPiecesSet_10: -948241001
-      ChessPiecesSet_11: 467998406
-      ChessPiecesSet_6: -705508656
-      ChessPiecesSet_7: 544964359
-      ChessPiecesSet_8: -1521076742
-      ChessPiecesSet_9: 1447733495
+      Bishop: -948241001
+      King: 544964359
+      Knight: 1447733495
+      Pawn: 467998406
+      Queen: -705508656
+      Rook: -1521076742
       bishop: 1673635174
       king: -1487596889
       knight: -311125193
