@@ -37,6 +37,62 @@ public class Board : MonoBehaviour
 
         switch (selected.Type)
         {
+            case TileType.Knight:
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    for (int j = -1; j <= 1; j += 2)
+                    {
+                        //refactor to inbounds func
+                        if (r - i >= 0 && r - i < rows && c - j * 2 >= 0 && c - j * 2 < columns)
+                        {
+                            Tile t1 = GetTile(r - i, c - j * 2);
+                            t1.ToggleHint(true);
+                        }
+                        if (r - i * 2 >= 0 && r - i * 2 < rows && c - j >= 0 && c - j < columns)
+                        {
+                            Tile t2 = GetTile(r - i * 2, c - j);
+                            t2.ToggleHint(true);
+                        }
+                    }
+                }
+
+                break;
+
+            case TileType.King:
+                for (int i = -1; i <= 1; i++)
+                {
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        int x = r - i, y = c - j;
+                        if (x < 0 || x >= columns || y < 0 || y >= rows) continue;
+
+                        Tile t = GetTile(x, y);
+                        if (t == selected) continue;
+
+                        t.ToggleHint(true);
+                    }
+                }
+                break;
+
+            case TileType.Pawn:
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    for (int j = -1; j <= 1; j += 2)
+                    {
+                        int x = r - i, y = c - j;
+
+                        //refactor the checking into GetTile call? 
+                        if (x < 0 || x >= columns || x < 0 || y >= rows) continue;
+                        Tile t = GetTile(x, y);
+
+                        t.ToggleHint(true);
+                    }
+                }
+
+                break;
+
+            //FIXME: add bishop func.
+            case TileType.Queen:
             case TileType.Rook:
                 for (int i = 0; i < rows; i++)
                 {
@@ -53,7 +109,6 @@ public class Board : MonoBehaviour
 
                     t.ToggleHint(true);
                 }
-
                 break;
 
             case TileType.Bishop:
@@ -63,21 +118,22 @@ public class Board : MonoBehaviour
 
                 if (d1 >= 0)
                 {
-                    for (int i=0; d1 + i < rows && i < columns; i++)
+                    for (int i = 0; d1 + i < rows && i < columns; i++)
                     {
                         Tile t = GetTile(d1 + i, i);
                         t.ToggleHint(true);
                     }
-                    for (int i=0; d2 - i >= 0 && i < columns; i++)
+                    for (int i = 0; d2 - i >= 0 && i < columns; i++)
                     {
                         if (d2 - i >= rows) continue;
                         Tile t = GetTile(d2 - i, i);
                         t.ToggleHint(true);
                     }
-                } else
+                }
+                else
                 {
                     d1 = Math.Abs(d1);
-                    for (int i=0; i < columns && d1 + i < rows; i++)
+                    for (int i = 0; i < columns && d1 + i < rows; i++)
                     {
                         Tile t = GetTile(i, d1 + i);
                         t.ToggleHint(true);
@@ -157,8 +213,9 @@ public class Board : MonoBehaviour
         renderer1.sprite = temp;
     }
 
-    private Tile GetTile(int R, int C)
+    private Tile? GetTile(int R, int C)
     {
+        if (R < 0 || R >= rows || C < 0 || C >= columns) return null;
         return tiles[R, C].GetComponent<Tile>();
     }
 
