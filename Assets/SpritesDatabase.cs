@@ -9,7 +9,7 @@ public static class SpritesDatabase
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
-        Sprites = Resources.LoadAll<Sprite>("Sprites/");
+        Sprites = Resources.LoadAll<Sprite>("Sprites/ChessPieces/");
         Length = Sprites.Length;
     }
 

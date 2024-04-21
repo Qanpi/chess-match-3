@@ -16,8 +16,13 @@ public enum TileType {
 
 public class Tile : MonoBehaviour
 {
+    [SerializeField] private Dot dotPrefab;
+    private Dot dot;
+
+    //do i need these coords? 
     public int X;
     public int Y;
+
     private int typeId;
     public TileType Type { get => (TileType)typeId; set => typeId = (int)value; }
 
@@ -31,13 +36,17 @@ public class Tile : MonoBehaviour
         spriteRenderer.sprite = SpritesDatabase.Sprites[typeId];
     }
 
-    private void OnEnable()
+    public void ToggleHint(bool visible)
     {
-        RefreshTileType(); 
+        dot.Toggle(visible);
     }
 
-    public bool Selected = false;
+    private void OnEnable()
+    {
+        dot = Instantiate(dotPrefab, this.transform); 
 
+        RefreshTileType();
+    }
 
     private void OnMouseDown()
     {

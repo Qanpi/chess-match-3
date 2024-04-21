@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class Board : MonoBehaviour
     [SerializeField] private int columns = 8;
 
     private GameObject[,] tiles;
+
     private readonly List<Tile> selection = new();
 
     // Start is called before the first frame update
@@ -29,9 +31,92 @@ public class Board : MonoBehaviour
         }
     }
 
+    private void ShowHints(Tile selected)
+    {
+        int r = selected.Y, c = selected.X;
+
+        switch (selected.Type)
+        {
+            case TileType.Rook:
+                for (int i = 0; i < rows; i++)
+                {
+                    Tile t = GetTile(i, c);
+                    if (t == selected) continue;
+
+                    t.ToggleHint(true);
+                }
+
+                for (int i = 0; i < columns; i++)
+                {
+                    Tile t = GetTile(r, i);
+                    if (t == selected) continue;
+
+                    t.ToggleHint(true);
+                }
+
+                break;
+
+            case TileType.Bishop:
+                //TODO: refactor
+                int d1 = r - c;
+                int d2 = r + c;
+
+                if (d1 >= 0)
+                {
+                    for (int i=0; d1 + i < rows && i < columns; i++)
+                    {
+                        Tile t = GetTile(d1 + i, i);
+                        t.ToggleHint(true);
+                    }
+                    for (int i=0; d2 - i >= 0 && i < columns; i++)
+                    {
+                        if (d2 - i >= rows) continue;
+                        Tile t = GetTile(d2 - i, i);
+                        t.ToggleHint(true);
+                    }
+                } else
+                {
+                    d1 = Math.Abs(d1);
+                    for (int i=0; i < columns && d1 + i < rows; i++)
+                    {
+                        Tile t = GetTile(i, d1 + i);
+                        t.ToggleHint(true);
+                    }
+                    for (int i = 0; i < columns && d2 - i >= 0; i++)
+                    {
+                        if (d2 - i >= rows) continue;
+                        Tile t = GetTile(d2 - i, i);
+                        t.ToggleHint(true);
+                    }
+                }
+
+                break;
+
+            default:
+                throw new ArgumentException("Invalid tile type.");
+        }
+    }
+
+    private void HideHints()
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                Tile t = GetTile(i, j);
+                t.ToggleHint(false);
+            }
+        }
+    }
+
     private void Tile_OnClick(object sender, System.EventArgs e)
     {
         Tile tile = (Tile)sender;
+
+        if (selection.Count == 0)
+        {
+            ShowHints(tile);
+        }
 
         selection.Add(tile);
 
@@ -39,26 +124,31 @@ public class Board : MonoBehaviour
         {
             Swap(selection[0], selection[1]);
 
+            HideHints();
             selection.Clear();
         }
     }
 
     private void Swap(Tile tile1, Tile tile2)
     {
+        if (tile1 == tile2) return;
         if (Mathf.Abs(tile1.X - tile2.X) + Mathf.Abs(tile1.Y - tile2.Y) > 1) return;
 
-        SwapSprites(tile1, tile2);
+        SwapTiles(tile1, tile2);
 
-        TileType temp = tile1.Type;
-        tile1.Type = tile2.Type;
-        tile2.Type = temp;
-
-        checkForMatch(tile1);
-        checkForMatch(tile2);
+        //unswap if no matches
+        if (!checkForMatch(tile1) && !checkForMatch(tile2))
+        {
+            SwapTiles(tile1, tile2);
+        }
     }
 
-    private void SwapSprites(Tile tile1, Tile tile2)
+    private void SwapTiles(Tile tile1, Tile tile2)
     {
+        TileType tempType = tile1.Type;
+        tile1.Type = tile2.Type;
+        tile2.Type = tempType;
+
         SpriteRenderer renderer1 = tile1.GetComponent<SpriteRenderer>();
         SpriteRenderer renderer2 = tile2.GetComponent<SpriteRenderer>();
 
@@ -69,12 +159,10 @@ public class Board : MonoBehaviour
 
     private Tile GetTile(int R, int C)
     {
-        //if (R >= rows || R < 0 || C >= columns || C < 0) return null;
-
         return tiles[R, C].GetComponent<Tile>();
     }
 
-    private void checkForMatch(Tile tile)
+    private bool checkForMatch(Tile tile)
     {
         int x = tile.X, y = tile.Y;
 
@@ -84,55 +172,58 @@ public class Board : MonoBehaviour
         //HORIZONTAL 
         for (int i = 0; x - i >= 0; i++)
         {
-            Tile adjacent = GetTile(y, x - i );
+            Tile adjacent = GetTile(y, x - i);
 
             if (adjacent.Type != tile.Type)
             {
                 break;
-            } 
+            }
 
-            horizontalConnections.Add(adjacent); 
+            horizontalConnections.Add(adjacent);
         }
 
-        for (int i = 1;  x + i < columns; i++)
+        for (int i = 1; x + i < columns; i++)
         {
-            Tile adjacent = GetTile(y, x + i );
+            Tile adjacent = GetTile(y, x + i);
 
             if (adjacent.Type != tile.Type)
             {
                 break;
-            } 
+            }
 
-            horizontalConnections.Add(adjacent); 
+            horizontalConnections.Add(adjacent);
         }
 
         //VERTICAL
         for (int i = 0; y - i >= 0; i++)
         {
-            Tile adjacent = GetTile(y - i, x );
+            Tile adjacent = GetTile(y - i, x);
 
             if (adjacent.Type != tile.Type)
             {
                 break;
-            } 
+            }
 
-            verticalConnections.Add(adjacent); 
+            verticalConnections.Add(adjacent);
         }
 
-        for (int i = 1;  y + i < rows; i++)
+        for (int i = 1; y + i < rows; i++)
         {
             Tile adjacent = GetTile(y + i, x);
 
             if (adjacent.Type != tile.Type)
             {
                 break;
-            } 
+            }
 
-            verticalConnections.Add(adjacent); 
+            verticalConnections.Add(adjacent);
         }
+
+        bool match = false;
 
         if (horizontalConnections.Count >= 3)
         {
+            match = true;
             foreach (Tile connected in horizontalConnections)
             {
                 connected.RefreshTileType();
@@ -141,23 +232,14 @@ public class Board : MonoBehaviour
 
         if (verticalConnections.Count >= 3)
         {
+            match = true;
             foreach (Tile connected in verticalConnections)
             {
                 connected.RefreshTileType();
             }
         }
 
-        //VERTICAL 
-        //for (int j = y - 1; j >= 0; j--)
-        //{
-        //    Tile adjacent = GetTile(x, j);
-
-        //    if (adjacent.Type == tile.Type)
-        //    {
-        //        vertical++;
-        //    }
-        //}
-
+        return match;
     }
 
 
