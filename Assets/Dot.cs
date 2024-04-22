@@ -4,10 +4,10 @@ public class Dot : MonoBehaviour
 {
     private void OnEnable()
     {
-        Toggle(false);
+        SetEnabled(false);
     }
 
-    public void Toggle(bool visible)
+    public void SetEnabled(bool visible)
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.enabled = visible;

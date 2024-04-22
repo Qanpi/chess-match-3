@@ -36,9 +36,9 @@ public class Tile : MonoBehaviour
         spriteRenderer.sprite = SpritesDatabase.Sprites[typeId];
     }
 
-    public void ToggleHint(bool visible)
+    public void SetHint(bool visible)
     {
-        dot.Toggle(visible);
+        dot.SetEnabled(visible);
     }
 
     private void OnEnable()

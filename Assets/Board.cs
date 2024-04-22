@@ -31,27 +31,28 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void ShowHints(Tile selected)
+    private List<Tile> GetLegalMoves(Tile tile)
     {
-        int r = selected.Y, c = selected.X;
+        int r = tile.Y, c = tile.X;
 
-        switch (selected.Type)
+        List<Tile> tiles = new List<Tile>();
+
+        switch (tile.Type)
         {
             case TileType.Knight:
                 for (int i = -1; i <= 1; i += 2)
                 {
                     for (int j = -1; j <= 1; j += 2)
                     {
-                        //refactor to inbounds func
                         if (r - i >= 0 && r - i < rows && c - j * 2 >= 0 && c - j * 2 < columns)
                         {
                             Tile t1 = GetTile(r - i, c - j * 2);
-                            t1.ToggleHint(true);
+                            tiles.Add(t1);
                         }
                         if (r - i * 2 >= 0 && r - i * 2 < rows && c - j >= 0 && c - j < columns)
                         {
                             Tile t2 = GetTile(r - i * 2, c - j);
-                            t2.ToggleHint(true);
+                            tiles.Add(t2);
                         }
                     }
                 }
@@ -67,9 +68,9 @@ public class Board : MonoBehaviour
                         if (x < 0 || x >= columns || y < 0 || y >= rows) continue;
 
                         Tile t = GetTile(x, y);
-                        if (t == selected) continue;
+                        if (t == tile) continue;
 
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                 }
                 break;
@@ -81,11 +82,10 @@ public class Board : MonoBehaviour
                     {
                         int x = r - i, y = c - j;
 
-                        //refactor the checking into GetTile call? 
                         if (x < 0 || x >= columns || x < 0 || y >= rows) continue;
                         Tile t = GetTile(x, y);
 
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                 }
 
@@ -97,17 +97,17 @@ public class Board : MonoBehaviour
                 for (int i = 0; i < rows; i++)
                 {
                     Tile t = GetTile(i, c);
-                    if (t == selected) continue;
+                    if (t == tile) continue;
 
-                    t.ToggleHint(true);
+                    tiles.Add(t);
                 }
 
                 for (int i = 0; i < columns; i++)
                 {
                     Tile t = GetTile(r, i);
-                    if (t == selected) continue;
+                    if (t == tile) continue;
 
-                    t.ToggleHint(true);
+                    tiles.Add(t);
                 }
                 break;
 
@@ -121,13 +121,13 @@ public class Board : MonoBehaviour
                     for (int i = 0; d1 + i < rows && i < columns; i++)
                     {
                         Tile t = GetTile(d1 + i, i);
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                     for (int i = 0; d2 - i >= 0 && i < columns; i++)
                     {
                         if (d2 - i >= rows) continue;
                         Tile t = GetTile(d2 - i, i);
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                 }
                 else
@@ -136,13 +136,13 @@ public class Board : MonoBehaviour
                     for (int i = 0; i < columns && d1 + i < rows; i++)
                     {
                         Tile t = GetTile(i, d1 + i);
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                     for (int i = 0; i < columns && d2 - i >= 0; i++)
                     {
                         if (d2 - i >= rows) continue;
                         Tile t = GetTile(d2 - i, i);
-                        t.ToggleHint(true);
+                        tiles.Add(t);
                     }
                 }
 
@@ -150,6 +150,17 @@ public class Board : MonoBehaviour
 
             default:
                 throw new ArgumentException("Invalid tile type.");
+        }
+
+        return tiles;
+    }
+
+    private void ShowHints(Tile selected)
+    {
+        List<Tile> tiles = GetLegalMoves(selected);
+        foreach (Tile t in tiles)
+        {
+            t.SetHint(true);
         }
     }
 
@@ -160,7 +171,7 @@ public class Board : MonoBehaviour
             for (int j = 0; j < columns; j++)
             {
                 Tile t = GetTile(i, j);
-                t.ToggleHint(false);
+                t.SetHint(false);
             }
         }
     }
@@ -178,24 +189,26 @@ public class Board : MonoBehaviour
 
         if (selection.Count == 2)
         {
-            Swap(selection[0], selection[1]);
+            Move(selection[0], selection[1]);
 
             HideHints();
             selection.Clear();
         }
     }
 
-    private void Swap(Tile tile1, Tile tile2)
+    private void Move(Tile tile1, Tile tile2)
     {
         if (tile1 == tile2) return;
-        if (Mathf.Abs(tile1.X - tile2.X) + Mathf.Abs(tile1.Y - tile2.Y) > 1) return;
+
+        List<Tile> legal = GetLegalMoves(tile1);
+        if (legal.Contains(tile2) == false) return;
 
         SwapTiles(tile1, tile2);
 
         //unswap if no matches
         if (!checkForMatch(tile1) && !checkForMatch(tile2))
         {
-            SwapTiles(tile1, tile2);
+            //SwapTiles(tile1, tile2);
         }
     }
 
