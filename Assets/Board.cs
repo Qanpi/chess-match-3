@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,11 +14,41 @@ public class Board : MonoBehaviour
 
     private readonly List<Tile> selection = new();
 
+    private (Tile first, Tile second)? nextMatch;
+
     // Start is called before the first frame update
     void Start()
     {
         tiles = new GameObject[rows, columns];
+        Shuffle();
+        
+        for (int i=0; i<rows; i++)
+        {
+            for (int j=0; j< columns; j++)
+            {
+                Tile t = GetTile(i, j);
+                RecursiveMatch(t);
+            }
+        }
 
+        EnsureNextMatch();
+    }
+
+    private void EnsureNextMatch()
+    {
+        nextMatch = FindMatch();
+        while (nextMatch is null)
+        {
+            Shuffle(); 
+            nextMatch = FindMatch();
+        }
+
+        Debug.Log(nextMatch.Value.first);
+        Debug.Log(nextMatch.Value.second);
+    }
+
+    private void Shuffle()
+    {
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
@@ -37,6 +69,7 @@ public class Board : MonoBehaviour
 
         List<Tile> tiles = new List<Tile>();
 
+        //TODO: maybe use a yield generator? 
         switch (tile.Type)
         {
             case TileType.Knight:
@@ -82,7 +115,7 @@ public class Board : MonoBehaviour
                     {
                         int x = r - i, y = c - j;
 
-                        if (x < 0 || x >= columns || x < 0 || y >= rows) continue;
+                        if (x < 0 || x >= columns || y < 0 || y >= rows) continue;
                         Tile t = GetTile(x, y);
 
                         tiles.Add(t);
@@ -121,12 +154,14 @@ public class Board : MonoBehaviour
                     for (int i = 0; d1 + i < rows && i < columns; i++)
                     {
                         Tile t = GetTile(d1 + i, i);
+                        if (t == tile) continue;
                         tiles.Add(t);
                     }
                     for (int i = 0; d2 - i >= 0 && i < columns; i++)
                     {
                         if (d2 - i >= rows) continue;
                         Tile t = GetTile(d2 - i, i);
+                        if (t == tile) continue;
                         tiles.Add(t);
                     }
                 }
@@ -136,12 +171,14 @@ public class Board : MonoBehaviour
                     for (int i = 0; i < columns && d1 + i < rows; i++)
                     {
                         Tile t = GetTile(i, d1 + i);
+                        if (t == tile) continue;
                         tiles.Add(t);
                     }
                     for (int i = 0; i < columns && d2 - i >= 0; i++)
                     {
                         if (d2 - i >= rows) continue;
                         Tile t = GetTile(d2 - i, i);
+                        if (t == tile) continue;
                         tiles.Add(t);
                     }
                 }
@@ -205,11 +242,13 @@ public class Board : MonoBehaviour
 
         SwapTiles(tile1, tile2);
 
-        //unswap if no matches
-        if (!checkForMatch(tile1) && !checkForMatch(tile2))
-        {
-            //SwapTiles(tile1, tile2);
-        }
+        RecursiveMatch(tile1);
+        RecursiveMatch(tile2);
+
+        //TODO: unswap if no matches found
+        //SwapTiles(tile1, tile2);
+
+        EnsureNextMatch();
     }
 
     private void SwapTiles(Tile tile1, Tile tile2)
@@ -226,13 +265,72 @@ public class Board : MonoBehaviour
         renderer1.sprite = temp;
     }
 
-    private Tile? GetTile(int R, int C)
+    private Tile GetTile(int R, int C)
     {
-        if (R < 0 || R >= rows || C < 0 || C >= columns) return null;
+        //if (R < 0 || R >= rows || C < 0 || C >= columns) return null;
         return tiles[R, C].GetComponent<Tile>();
     }
 
-    private bool checkForMatch(Tile tile)
+    private void RecursiveMatch(Tile tile)
+    {
+        var matched = CheckForMatch(tile);
+        if (matched is not null)
+        {
+            foreach (Tile t in matched)
+            {
+                t.RefreshTileType();
+                RecursiveMatch(t);
+            }
+        }
+    }
+
+    private List<Tile>? CheckForMatch(Tile tile)
+    {
+        var connections = FindConnections(tile);
+
+        const int threshold = 3;
+        if (connections.horizontal.Count >= threshold)
+        {
+            return connections.horizontal;
+        }
+
+        if (connections.vertical.Count >= threshold)
+        {
+            return connections.vertical;
+        }
+
+        return null;
+    }
+
+    private (Tile first, Tile second)? FindMatch()
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                Tile t = GetTile(i, j);
+
+                var moves = GetLegalMoves(t);
+
+                foreach (Tile m in moves)
+                {
+                    SwapTiles(t, m);
+
+                    if (CheckForMatch(m) is not null || CheckForMatch(t) is not null)
+                    {
+                        SwapTiles(t, m);
+                        return (t, m);
+                    }
+
+                    SwapTiles(t, m);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private (List<Tile> horizontal, List<Tile> vertical) FindConnections(Tile tile)
     {
         int x = tile.X, y = tile.Y;
 
@@ -289,27 +387,7 @@ public class Board : MonoBehaviour
             verticalConnections.Add(adjacent);
         }
 
-        bool match = false;
-
-        if (horizontalConnections.Count >= 3)
-        {
-            match = true;
-            foreach (Tile connected in horizontalConnections)
-            {
-                connected.RefreshTileType();
-            }
-        }
-
-        if (verticalConnections.Count >= 3)
-        {
-            match = true;
-            foreach (Tile connected in verticalConnections)
-            {
-                connected.RefreshTileType();
-            }
-        }
-
-        return match;
+        return (horizontalConnections, verticalConnections);
     }
 
 
@@ -368,16 +446,4 @@ public class Board : MonoBehaviour
     //tilemap.SetTile(tile1.position, tile2.tile);
     //tilemap.SetTile(tile2.position, tile1.tile);*/
     //}
-
-    void Shuffle()
-    {
-        /*for (int i=0; i<Width; i++)
-        {
-            for (int j=0; j<Height; j++)
-            {
-                PieceTile tile = PieceTile.CreateInstance<PieceTile>();
-                tilemap.SetTile(new Vector3Int(i, j), tile);
-            }
-        }*/
-    }
 }

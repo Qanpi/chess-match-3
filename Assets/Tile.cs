@@ -53,4 +53,9 @@ public class Tile : MonoBehaviour
         OnClick?.Invoke(this, EventArgs.Empty);
     }
 
+    override public string ToString()
+    {
+        return $"{Type} at row {Y}, column {X}";
+    }
+
 }
