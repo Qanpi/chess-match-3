@@ -32,8 +32,25 @@ public class Tile : MonoBehaviour
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 
-        Type = (TileType)UnityEngine.Random.Range(0, SpritesDatabase.Length);
-        spriteRenderer.sprite = SpritesDatabase.Sprites[typeId];
+        //TODO: weighted random for tile types
+        Type = (TileType)UnityEngine.Random.Range(0, ChessPiecesSprites.Length);
+        spriteRenderer.sprite = ChessPiecesSprites.Sprites[typeId];
+
+        Color color; 
+        switch(Type)
+        {
+            case TileType.Bishop:
+                color = Color.red;
+                break;
+            case TileType.King:
+                color = Color.yellow;
+                break;
+            default:
+                color = Color.white;
+                break;
+        }
+
+        spriteRenderer.color = color;
     }
 
     public void SetHint(bool visible)
@@ -43,9 +60,9 @@ public class Tile : MonoBehaviour
 
     private void OnEnable()
     {
-        dot = Instantiate(dotPrefab, this.transform); 
-
         RefreshTileType();
+
+        dot = Instantiate(dotPrefab, this.transform); 
     }
 
     private void OnMouseDown()

@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.RendererUtils;
 
 public class Board : MonoBehaviour
 {
@@ -21,10 +23,10 @@ public class Board : MonoBehaviour
     {
         tiles = new GameObject[rows, columns];
         Shuffle();
-        
-        for (int i=0; i<rows; i++)
+
+        for (int i = 0; i < rows; i++)
         {
-            for (int j=0; j< columns; j++)
+            for (int j = 0; j < columns; j++)
             {
                 Tile t = GetTile(i, j);
                 RecursiveMatch(t);
@@ -39,7 +41,7 @@ public class Board : MonoBehaviour
         nextMatch = FindMatch();
         while (nextMatch is null)
         {
-            Shuffle(); 
+            Shuffle();
             nextMatch = FindMatch();
         }
 
@@ -68,6 +70,66 @@ public class Board : MonoBehaviour
         int r = tile.Y, c = tile.X;
 
         List<Tile> tiles = new List<Tile>();
+
+        void RookLegalMoves(Tile tile)
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                Tile t = GetTile(i, c);
+                if (t == tile) continue;
+
+                tiles.Add(t);
+            }
+
+            for (int i = 0; i < columns; i++)
+            {
+                Tile t = GetTile(r, i);
+                if (t == tile) continue;
+
+                tiles.Add(t);
+            }
+        }
+
+        void BishopLegalMoves(Tile tile)
+        {
+            //TODO: refactor
+            int d1 = r - c;
+            int d2 = r + c;
+
+            if (d1 >= 0)
+            {
+                for (int i = 0; d1 + i < rows && i < columns; i++)
+                {
+                    Tile t = GetTile(d1 + i, i);
+                    if (t == tile) continue;
+                    tiles.Add(t);
+                }
+                for (int i = 0; d2 - i >= 0 && i < columns; i++)
+                {
+                    if (d2 - i >= rows) continue;
+                    Tile t = GetTile(d2 - i, i);
+                    if (t == tile) continue;
+                    tiles.Add(t);
+                }
+            }
+            else
+            {
+                d1 = Math.Abs(d1);
+                for (int i = 0; i < columns && d1 + i < rows; i++)
+                {
+                    Tile t = GetTile(i, d1 + i);
+                    if (t == tile) continue;
+                    tiles.Add(t);
+                }
+                for (int i = 0; i < columns && d2 - i >= 0; i++)
+                {
+                    if (d2 - i >= rows) continue;
+                    Tile t = GetTile(d2 - i, i);
+                    if (t == tile) continue;
+                    tiles.Add(t);
+                }
+            }
+        }
 
         //TODO: maybe use a yield generator? 
         switch (tile.Type)
@@ -124,65 +186,17 @@ public class Board : MonoBehaviour
 
                 break;
 
-            //FIXME: add bishop func.
             case TileType.Queen:
+                RookLegalMoves(tile);
+                BishopLegalMoves(tile);
+                break;
+
             case TileType.Rook:
-                for (int i = 0; i < rows; i++)
-                {
-                    Tile t = GetTile(i, c);
-                    if (t == tile) continue;
-
-                    tiles.Add(t);
-                }
-
-                for (int i = 0; i < columns; i++)
-                {
-                    Tile t = GetTile(r, i);
-                    if (t == tile) continue;
-
-                    tiles.Add(t);
-                }
+                RookLegalMoves(tile);
                 break;
 
             case TileType.Bishop:
-                //TODO: refactor
-                int d1 = r - c;
-                int d2 = r + c;
-
-                if (d1 >= 0)
-                {
-                    for (int i = 0; d1 + i < rows && i < columns; i++)
-                    {
-                        Tile t = GetTile(d1 + i, i);
-                        if (t == tile) continue;
-                        tiles.Add(t);
-                    }
-                    for (int i = 0; d2 - i >= 0 && i < columns; i++)
-                    {
-                        if (d2 - i >= rows) continue;
-                        Tile t = GetTile(d2 - i, i);
-                        if (t == tile) continue;
-                        tiles.Add(t);
-                    }
-                }
-                else
-                {
-                    d1 = Math.Abs(d1);
-                    for (int i = 0; i < columns && d1 + i < rows; i++)
-                    {
-                        Tile t = GetTile(i, d1 + i);
-                        if (t == tile) continue;
-                        tiles.Add(t);
-                    }
-                    for (int i = 0; i < columns && d2 - i >= 0; i++)
-                    {
-                        if (d2 - i >= rows) continue;
-                        Tile t = GetTile(d2 - i, i);
-                        if (t == tile) continue;
-                        tiles.Add(t);
-                    }
-                }
-
+                BishopLegalMoves(tile);
                 break;
 
             default:
@@ -259,6 +273,11 @@ public class Board : MonoBehaviour
 
         SpriteRenderer renderer1 = tile1.GetComponent<SpriteRenderer>();
         SpriteRenderer renderer2 = tile2.GetComponent<SpriteRenderer>();
+
+        //FIXME: ugly
+        Color tempColor = renderer1.color;
+        renderer1.color = renderer2.color;
+        renderer2.color = tempColor;
 
         Sprite temp = renderer2.sprite;
         renderer2.sprite = renderer1.sprite;

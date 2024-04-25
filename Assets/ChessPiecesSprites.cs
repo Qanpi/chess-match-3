@@ -1,7 +1,7 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
 
-public static class SpritesDatabase
+public static class ChessPiecesSprites
 {
     public static Sprite[] Sprites { get; private set; }
     public static int Length { get; private set; }
